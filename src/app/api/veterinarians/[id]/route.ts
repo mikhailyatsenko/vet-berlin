@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { VeterinarianService } from '@/lib/veterinarians';
 
 export async function GET(
+  request: Request,
   context: unknown
 ) {
   try {
