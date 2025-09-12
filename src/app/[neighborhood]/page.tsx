@@ -1,14 +1,22 @@
 import Link from 'next/link';
 import { VeterinarianService } from '@/lib/veterinarians';
 import { Veterinarian } from '@/lib/mongodb';
+import VeterinarianCard from '@/components/VeterinarianCard';
 
 interface PageProps {
   params: Promise<{ neighborhood: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-function deslugify(slug: string) {
-  return slug.replace(/-/g, ' ');
+function slugify(input: string): string {
+  return input
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 }
 
 function buildUrl(pathname: string, params: Record<string, string | undefined>) {
@@ -28,10 +36,12 @@ export default async function NeighborhoodPage({ params, searchParams }: PagePro
   const category = typeof sp.category === 'string' ? sp.category : '';
   const openNow = sp.openNow === 'true';
 
-  const neighborhoodName = deslugify(decodeURIComponent(neighborhood));
-
   const stats = await VeterinarianService.getStats();
   const categoriesList = stats.categories as string[];
+  const neighborhoodsList = stats.neighborhoods as string[];
+
+  const slug = decodeURIComponent(neighborhood);
+  const neighborhoodName = neighborhoodsList.find(n => slugify(n) === slug) || slug.replace(/-/g, ' ');
 
   const { items, total, page: currentPage, pageSize: currentPageSize } = await VeterinarianService.complexSearchWithPagination({
     text: text || undefined,
@@ -85,13 +95,7 @@ export default async function NeighborhoodPage({ params, searchParams }: PagePro
         {items.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((v: Veterinarian) => (
-              <Link key={v.googleMapsId} href={`/veterinarian/${v.googleMapsId}`} className="block">
-                {/* Keep consistent styling via card could be used here if desired */}
-                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden p-4">
-                  <div className="font-semibold text-gray-900 mb-1">{v.title}</div>
-                  <div className="text-sm text-gray-600">{v.categoryName}</div>
-                </div>
-              </Link>
+              <VeterinarianCard key={v.googleMapsId} veterinarian={v} />
             ))}
           </div>
         ) : (
