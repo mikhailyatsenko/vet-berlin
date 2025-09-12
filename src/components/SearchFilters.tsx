@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Star, Filter, X } from 'lucide-react';
+import { Search, MapPin, Filter, X } from 'lucide-react';
 
 interface SearchFiltersProps {
   onSearch: (filters: {
     text: string;
-    minRating: number;
     category: string;
     neighborhood: string;
     openNow?: boolean;
@@ -26,7 +25,6 @@ export default function SearchFilters({
 }: SearchFiltersProps) {
   const [filters, setFilters] = useState({
     text: '',
-    minRating: 0,
     category: '',
     neighborhood: initialNeighborhood || '',
     openNow: false
@@ -46,7 +44,6 @@ export default function SearchFilters({
   const handleReset = () => {
     const reset = {
       text: '',
-      minRating: 0,
       category: '',
       neighborhood: '',
       openNow: false
@@ -88,7 +85,7 @@ export default function SearchFilters({
           Filters
         </button>
         
-        {(filters.minRating > 0 || filters.category || filters.neighborhood || filters.openNow) && (
+        {(filters.category || filters.neighborhood || filters.openNow) && (
           <button
             onClick={handleReset}
             className="flex items-center text-red-600 hover:text-red-800"
@@ -102,26 +99,6 @@ export default function SearchFilters({
       {/* Filters Panel */}
       {showFilters && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
-          {/* Rating Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Star className="w-4 h-4 inline mr-1" />
-              Minimum Rating
-            </label>
-            <select
-              value={filters.minRating}
-              onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value={0}>Any Rating</option>
-              <option value={3.0}>3.0+ stars</option>
-              <option value={3.5}>3.5+ stars</option>
-              <option value={4.0}>4.0+ stars</option>
-              <option value={4.5}>4.5+ stars</option>
-              <option value={5.0}>5.0 stars</option>
-            </select>
-          </div>
-
           {/* Category Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -149,7 +126,12 @@ export default function SearchFilters({
             </label>
             <select
               value={filters.neighborhood}
-              onChange={(e) => setFilters({ ...filters, neighborhood: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value;
+                const next = { ...filters, neighborhood: value };
+                setFilters(next);
+                onSearch(next);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Neighborhoods</option>
@@ -170,7 +152,11 @@ export default function SearchFilters({
             <input
               type="checkbox"
               checked={filters.openNow}
-              onChange={(e) => setFilters({ ...filters, openNow: e.target.checked })}
+              onChange={(e) => {
+                const next = { ...filters, openNow: e.target.checked };
+                setFilters(next);
+                onSearch(next);
+              }}
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <span>Open now (Berlin time)</span>
@@ -179,15 +165,9 @@ export default function SearchFilters({
       )}
 
       {/* Active Filters Display */}
-      {(filters.minRating > 0 || filters.category || filters.neighborhood || filters.openNow) && (
+      {(filters.category || filters.neighborhood || filters.openNow) && (
         <div className="mt-4 pt-4 border-t">
           <div className="flex flex-wrap gap-2">
-            {filters.minRating > 0 && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                <Star className="w-3 h-3 mr-1" />
-                {filters.minRating}+ stars
-              </span>
-            )}
             {filters.category && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 {filters.category}

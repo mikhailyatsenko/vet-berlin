@@ -6,7 +6,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     
     const text = searchParams.get('text') || undefined;
-    const minRating = searchParams.get('minRating') ? parseFloat(searchParams.get('minRating')!) : undefined;
     const category = searchParams.get('category') || undefined;
     const neighborhood = searchParams.get('neighborhood') || undefined;
     const lng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : undefined;
@@ -19,7 +18,6 @@ export async function GET(request: NextRequest) {
 
     const filters = {
       text,
-      minRating,
       category,
       neighborhood,
       lng,

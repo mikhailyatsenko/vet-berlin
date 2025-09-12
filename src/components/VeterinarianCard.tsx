@@ -4,6 +4,8 @@ import { MapPin, Star, Phone, Globe, Clock } from 'lucide-react';
 import { Veterinarian } from '@/lib/mongodb';
 import { getBerlinTodayName, convertHoursTo24h } from '@/lib/timeUtils';
 
+type OpeningHour = { day: string; hours: string };
+
 interface VeterinarianCardProps {
   veterinarian: Veterinarian;
 }
@@ -20,7 +22,7 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
     ));
   };
 
-  const formatOpeningHours = (hours: any[]) => {
+  const formatOpeningHours = (hours: OpeningHour[]) => {
     if (!hours || hours.length === 0) return 'Hours not specified';
     const today = getBerlinTodayName();
     const todayHours = hours.find(h => h.day === today);
@@ -40,7 +42,6 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={(e) => {
-              // Fallback to placeholder if image fails to load
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
             }}
@@ -102,7 +103,7 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
         <div className="flex items-center mb-4">
           <Clock className="w-4 h-4 text-gray-400 mr-2" />
           <p className="text-sm text-gray-600">
-            {formatOpeningHours(veterinarian.openingHours)}
+            {formatOpeningHours(veterinarian.openingHours as unknown as OpeningHour[])}
           </p>
         </div>
 
@@ -147,7 +148,7 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
               </span>
             </div>
             <p className="text-sm text-gray-600 line-clamp-2">
-              "{veterinarian.googleReview.text}"
+              &quot;{veterinarian.googleReview.text}&quot;
             </p>
           </div>
         )}

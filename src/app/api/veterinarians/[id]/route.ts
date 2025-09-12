@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { VeterinarianService } from '@/lib/veterinarians';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  context: unknown
 ) {
   try {
-    const { id } = params;
+    const id = (context as { params?: { id?: string } })?.params?.id;
     
     if (!id) {
       return NextResponse.json(

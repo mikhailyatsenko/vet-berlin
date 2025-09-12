@@ -1,3 +1,4 @@
+import React from 'react';
 /**
  * Utility functions for image handling
  */

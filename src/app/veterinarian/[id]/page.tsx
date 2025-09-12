@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { convertHoursTo24h } from '@/lib/timeUtils';
 
+type OpeningHour = { day: string; hours: string };
+
 export default function VeterinarianDetailPage() {
   const params = useParams();
   const [veterinarian, setVeterinarian] = useState<Veterinarian | null>(null);
@@ -60,7 +62,7 @@ export default function VeterinarianDetailPage() {
     ));
   };
 
-  const formatOpeningHours = (hours: any[]) => {
+  const formatOpeningHours = (hours: OpeningHour[]) => {
     if (!hours || hours.length === 0) return null;
     const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     return weekdays.map((day) => {
@@ -139,7 +141,6 @@ export default function VeterinarianDetailPage() {
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
                   onError={(e) => {
-                    // Fallback to placeholder if image fails to load
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                   }}
@@ -229,7 +230,7 @@ export default function VeterinarianDetailPage() {
                   Opening Hours
                 </h2>
                 <div className="space-y-1">
-                  {formatOpeningHours(veterinarian.openingHours)}
+                  {formatOpeningHours(veterinarian.openingHours as unknown as OpeningHour[])}
                 </div>
               </div>
             )}
@@ -249,7 +250,7 @@ export default function VeterinarianDetailPage() {
                   </span>
                 </div>
                 <p className="text-gray-700 leading-relaxed">
-                  "{veterinarian.googleReview.text}"
+                  &quot;{veterinarian.googleReview.text}&quot;
                 </p>
               </div>
             )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Veterinarian } from '@/lib/mongodb';
 import VeterinarianCard from '@/components/VeterinarianCard';
@@ -32,12 +32,22 @@ function slugify(input: string): string {
 }
 
 export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>}>
+      <HomePageContent />
+    </Suspense>
+  );
+}
+
+function HomePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
   const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
+  const [neighborhoodsList, setNeighborhoodsList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -50,9 +60,8 @@ export default function HomePage() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   // Persisted filters state
-  const [activeFilters, setActiveFilters] = useState<{ text: string; minRating: number; category: string; neighborhood: string; openNow?: boolean }>({
+  const [activeFilters, setActiveFilters] = useState<{ text: string; category: string; neighborhood: string; openNow?: boolean }>({
     text: '',
-    minRating: 0,
     category: '',
     neighborhood: '',
     openNow: false
@@ -75,11 +84,12 @@ export default function HomePage() {
   const loadInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      // Load stats only; veterinarians will be fetched by URL-driven effect
       const statsRes = await fetch('/api/stats');
       if (!statsRes.ok) throw new Error('Failed to load stats');
       const statsData = await statsRes.json();
       setStats(statsData.data.stats);
+      setCategoriesList(statsData.data.categories || statsData.data.stats?.categories || []);
+      setNeighborhoodsList(statsData.data.neighborhoods || statsData.data.stats?.neighborhoods || []);
       setError(null);
     } catch (err) {
       setError('Failed to load data. Please try again later.');
@@ -89,18 +99,15 @@ export default function HomePage() {
     }
   }, []);
 
-  // Load stats on mount
   useEffect(() => {
     loadInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep neighborhood from path in filters (after stats load we can resolve to canonical)
   useEffect(() => {
     const resolvedNeighborhood = resolveNeighborhoodFromSlug();
     if (resolvedNeighborhood && activeFilters.neighborhood !== resolvedNeighborhood) {
       setActiveFilters((prev) => ({ ...prev, neighborhood: resolvedNeighborhood }));
-      // reset page to 1 when neighborhood path changes
       const qs = new URLSearchParams(Array.from(searchParams.entries()));
       qs.set('page', '1');
       skipUrlEffectRef.current = true;
@@ -116,7 +123,6 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolveNeighborhoodFromSlug]);
 
-  // React to URL query changes for page and openNow
   useEffect(() => {
     const urlPage = Number(searchParams.get('page')) || 1;
     const urlOpenNow = searchParams.get('openNow') === 'true';
@@ -136,7 +142,7 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, resolveNeighborhoodFromSlug]);
 
-  const fetchVeterinarians = async (overrides?: Partial<{ page: number; pageSize: number; text: string; minRating: number; category: string; neighborhood: string; openNow?: boolean }>) => {
+  const fetchVeterinarians = async (overrides?: Partial<{ page: number; pageSize: number; text: string; category: string; neighborhood: string; openNow?: boolean }>) => {
     try {
       setLoading(true);
       setError(null);
@@ -146,7 +152,6 @@ export default function HomePage() {
       const neighborhoodFromPath = resolveNeighborhoodFromSlug();
       const nextFilters = {
         text: overrides?.text ?? activeFilters.text,
-        minRating: overrides?.minRating ?? activeFilters.minRating,
         category: overrides?.category ?? activeFilters.category,
         neighborhood: overrides?.neighborhood ?? (neighborhoodFromPath || activeFilters.neighborhood),
         openNow: overrides?.openNow ?? activeFilters.openNow
@@ -156,7 +161,6 @@ export default function HomePage() {
       params.append('page', String(nextPage));
       params.append('pageSize', String(nextPageSize));
       if (nextFilters.text) params.append('text', nextFilters.text);
-      if (nextFilters.minRating > 0) params.append('minRating', nextFilters.minRating.toString());
       if (nextFilters.category) params.append('category', nextFilters.category);
       if (nextFilters.neighborhood) params.append('neighborhood', nextFilters.neighborhood);
       if (nextFilters.openNow) params.append('openNow', 'true');
@@ -187,12 +191,10 @@ export default function HomePage() {
 
   const handleSearch = async (filters: {
     text: string;
-    minRating: number;
     category: string;
     neighborhood: string;
     openNow?: boolean;
   }) => {
-    // Update pretty URL path with slugified neighborhood and openNow flag in query
     const targetNeighborhood = (filters.neighborhood || '').trim();
     const slug = targetNeighborhood ? slugify(targetNeighborhood) : '';
     const qs = new URLSearchParams(Array.from(searchParams.entries()));
@@ -209,7 +211,6 @@ export default function HomePage() {
     setCurrentLocation(coords);
     setLocationError(null);
     
-    // Automatically search for nearby veterinarians from page 1 (clears neighborhood path)
     if (pathSlug) {
       const qs = new URLSearchParams(Array.from(searchParams.entries()));
       qs.set('page', '1');
@@ -219,7 +220,6 @@ export default function HomePage() {
 
     handleSearch({
       text: '',
-      minRating: 0,
       category: '',
       neighborhood: '',
       openNow: activeFilters.openNow
@@ -235,7 +235,6 @@ export default function HomePage() {
     if (clamped !== page) {
       const qs = new URLSearchParams(Array.from(searchParams.entries()));
       qs.set('page', String(clamped));
-      // preserve openNow in URL
       if (activeFilters.openNow) qs.set('openNow', 'true'); else qs.delete('openNow');
       router.push(`${pathname}?${qs.toString()}`, { scroll: false });
     }
@@ -312,8 +311,8 @@ export default function HomePage() {
         {stats && (
           <SearchFilters
             onSearch={handleSearch}
-            categories={stats.categories}
-            neighborhoods={stats.neighborhoods}
+            categories={categoriesList}
+            neighborhoods={neighborhoodsList}
             loading={loading}
             initialNeighborhood={resolveNeighborhoodFromSlug()}
           />

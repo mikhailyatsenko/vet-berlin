@@ -16,7 +16,7 @@ function parseTime12hToMinutes(part: string, fallbackMeridiem?: 'AM' | 'PM'): nu
   if (!m) return null;
   let hour = parseInt(m[1], 10);
   const minute = m[2] ? parseInt(m[2], 10) : 0;
-  let meridiem = (m[3] || fallbackMeridiem || '').toUpperCase();
+  const meridiem = (m[3] || fallbackMeridiem || '').toUpperCase();
   if (hour === 12) hour = 0; // normalize 12AM -> 0, 12PM handled by adding 12 later
   let total = hour * 60 + minute;
   if (meridiem === 'PM') total += 12 * 60;
@@ -45,9 +45,9 @@ export function convertHoursTo24h(range: string): string {
 
   const fmt = (mins: number) => {
     const h = Math.floor(mins / 60) % 24;
-    const m = mins % 60;
+    const m2 = mins % 60;
     const hh = h.toString().padStart(2, '0');
-    const mm = m.toString().padStart(2, '0');
+    const mm = m2.toString().padStart(2, '0');
     return `${hh}:${mm}`;
   };
 

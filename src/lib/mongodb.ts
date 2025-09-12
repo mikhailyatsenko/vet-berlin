@@ -1,25 +1,26 @@
 import { MongoClient, Db } from 'mongodb';
 
-const MONGO_URI: string = process.env.MONGO_URI!;
-const DB_NAME: string = process.env.DB_NAME!;
+const MONGO_URI: string = process.env.MONGO_URI || '';
+const DB_NAME: string = process.env.DB_NAME || '';
 
 if (!MONGO_URI) {
   throw new Error('Please define the MONGO_URI environment variable inside .env.local');
 }
 
 interface CachedConnection {
-  client: MongoClient;
-  db: Db;
+  client: MongoClient | undefined;
+  db: Db | undefined;
 }
 
 declare global {
+  // eslint-disable-next-line no-var
   var mongo: CachedConnection | undefined;
 }
 
-let cached = global.mongo;
+let cached: CachedConnection | undefined = global.mongo;
 
 if (!cached) {
-  cached = global.mongo = { client: undefined as any, db: undefined as any };
+  cached = global.mongo = { client: undefined, db: undefined };
 }
 
 export async function connectToDatabase() {
@@ -30,19 +31,19 @@ export async function connectToDatabase() {
   if (!cached?.client) {
     cached = global.mongo = { 
       client: new MongoClient(MONGO_URI), 
-      db: undefined as any 
+      db: undefined 
     };
   }
 
   try {
-    await cached.client.connect();
-  } catch (error) {
-    // Connection already established or error occurred
+    await cached.client!.connect();
+  } catch {
+    // ignore
   }
 
-  cached.db = cached.client.db(DB_NAME);
+  cached.db = cached.client!.db(DB_NAME);
 
-  return { client: cached.client, db: cached.db };
+  return { client: cached.client!, db: cached.db! };
 }
 
 export interface Veterinarian {
@@ -62,7 +63,7 @@ export interface Veterinarian {
   };
   googleScore: number;
   categories: string[];
-  openingHours: any[];
+  openingHours: { day: string; hours: string }[];
   googleMapsId: string;
   googleReview?: {
     text: string;
@@ -75,7 +76,6 @@ export interface Veterinarian {
 
 export interface SearchFilters {
   text?: string;
-  minRating?: number;
   category?: string;
   neighborhood?: string;
   lng?: number;
