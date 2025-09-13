@@ -22,7 +22,7 @@ function slugify(input: string): string {
 function buildUrl(pathname: string, params: Record<string, string | undefined>) {
   const q = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
-    if (v) q.set(k, v);
+    if (v && !(k === 'page' && v === '1')) q.set(k, v);
   });
   const query = q.toString();
   return query ? `${pathname}?${query}` : pathname;
@@ -35,21 +35,21 @@ export default async function HomePage({ searchParams }: PageProps) {
   const text = typeof sp.text === 'string' ? sp.text : '';
   const category = typeof sp.category === 'string' ? sp.category : '';
   const neighborhoodQuery = typeof sp.neighborhood === 'string' ? sp.neighborhood : '';
-  const openNow = sp.openNow === 'true';
+  const openNow = sp.openNow === 'on';
 
   if (neighborhoodQuery) {
     const slug = slugify(neighborhoodQuery);
     const url = buildUrl(`/${slug}`, {
-      page: String(page),
+      page: page > 1 ? String(page) : undefined,
       text: text || undefined,
       category: category || undefined,
-      openNow: openNow ? 'true' : undefined
+      openNow: openNow ? 'on' : undefined
     });
     redirect(url);
   }
 
   const stats = await VeterinarianService.getStats();
-  const categoriesList = stats.categories as string[];
+  // const categoriesList = stats.categories as string[];
   const neighborhoodsList = stats.neighborhoods as string[];
 
   const { items, total, page: currentPage, pageSize: currentPageSize } = await VeterinarianService.complexSearchWithPagination({
@@ -69,7 +69,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">🐾 Veterinarian Directory</h1>
-              <p className="mt-2 text-gray-600">Find the best veterinarians in your city</p>
+              <p className="mt-2 text-gray-600">Find the best veterinarians in your Berlin</p>
             </div>
           </div>
 
@@ -97,19 +97,19 @@ export default async function HomePage({ searchParams }: PageProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <form method="GET" action="/" className="space-y-4">
-            <div className="relative">
+            {/* <div className="relative">
               <input type="text" name="text" placeholder="Search veterinarians, clinics, services..." defaultValue={text} className="w-full pl-4 pr-28 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Search</button>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Service Category</label>
                 <select name="category" defaultValue={category} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                   <option value="">All Categories</option>
                   {categoriesList.map((c) => (<option key={c} value={c}>{c}</option>))}
                 </select>
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Neighborhood</label>
@@ -124,7 +124,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
               <div className="flex items-center gap-2 pt-6 md:pt-0">
                 <input type="checkbox" id="openNow" name="openNow" defaultChecked={openNow} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <label htmlFor="openNow" className="text-sm text-gray-700">Open now (Berlin time)</label>
+                <label htmlFor="openNow" className="text-sm text-gray-700">Open now</label>
               </div>
             </div>
           </form>
@@ -148,10 +148,10 @@ export default async function HomePage({ searchParams }: PageProps) {
           <div className="text-sm text-gray-600">Page {currentPage} of {totalPages}</div>
           <div className="flex items-center gap-2">
             <Link className={`px-4 py-2 border rounded-md ${currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}`}
-              href={buildUrl('/', { page: String(Math.max(1, currentPage - 1)), text: text || undefined, category: category || undefined, openNow: openNow ? 'true' : undefined })}
+              href={buildUrl('/', { page: String(Math.max(1, currentPage - 1)), text: text || undefined, category: category || undefined, openNow: openNow ? 'on' : undefined })}
             >Previous</Link>
             <Link className={`px-4 py-2 border rounded-md ${currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}`}
-              href={buildUrl('/', { page: String(Math.min(totalPages, currentPage + 1)), text: text || undefined, category: category || undefined, openNow: openNow ? 'true' : undefined })}
+              href={buildUrl('/', { page: String(Math.min(totalPages, currentPage + 1)), text: text || undefined, category: category || undefined, openNow: openNow ? 'on' : undefined })}
             >Next</Link>
           </div>
         </div>

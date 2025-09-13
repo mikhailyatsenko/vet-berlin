@@ -45,7 +45,8 @@ export function isAllowedImageDomain(url: string): boolean {
     'streetviewpixels-pa.googleapis.com',
     'lh3.googleusercontent.com',
     'maps.googleapis.com',
-    'googleusercontent.com'
+    'googleusercontent.com',
+    'ik.imagekit.io'
   ];
   
   return allowedDomains.some(allowedDomain => 
@@ -59,16 +60,15 @@ export function isAllowedImageDomain(url: string): boolean {
 export function getImageProps(url: string, alt: string) {
   return {
     src: url,
-    alt,
-    onError: (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const target = e.target as HTMLImageElement;
-      target.style.display = 'none';
-    },
-    onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const target = e.target as HTMLImageElement;
-      target.style.display = 'block';
-    }
+    alt
   };
+}
+
+/**
+ * Generate image URL from document ID
+ */
+export function generateImageUrl(documentId: string): string {
+  return `https://ik.imagekit.io/bdga8gpws/vet-berlin/main-img/${documentId}/main.jpg`;
 }
 
 /**

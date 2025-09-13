@@ -55,6 +55,7 @@ export class VeterinarianService {
    * Complex search with multiple filters (paginated)
    */
   static async complexSearchWithPagination(filters: SearchFilters = {}): Promise<{ items: Veterinarian[]; total: number; page: number; pageSize: number; }> {
+   console.log('filters', filters);
     const collection = await this.getCollection();
 
     const pageSize = filters.pageSize || filters.limit || 20;
@@ -220,7 +221,7 @@ export class VeterinarianService {
     const totalDocs = await collection.countDocuments();
     const highRated = await collection.countDocuments({ googleScore: { $gte: 4.5 } });
     const withReviews = await collection.countDocuments({ googleReview: { $exists: true } });
-    const withImages = await collection.countDocuments({ imageUrl: { $exists: true } });
+    const withImages = await collection.countDocuments({ imageUrl: true });
     
     const categories = await collection.distinct('categoryName');
     const neighborhoods = await collection.distinct('neighborhood');

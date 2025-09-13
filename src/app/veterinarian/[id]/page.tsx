@@ -16,6 +16,7 @@ import {
   Navigation
 } from 'lucide-react';
 import { convertHoursTo24h } from '@/lib/timeUtils';
+import { generateImageUrl, getImagePlaceholder } from '@/lib/imageUtils';
 
 type OpeningHour = { day: string; hours: string };
 
@@ -133,25 +134,16 @@ export default function VeterinarianDetailPage() {
           <div className="lg:col-span-2">
             {/* Image */}
             <div className="relative h-64 md:h-80 w-full mb-6 rounded-lg overflow-hidden bg-gray-200">
-              {veterinarian.imageUrl ? (
+              {veterinarian.imageUrl && veterinarian._id ? (
                 <Image
-                  src={veterinarian.imageUrl}
+                  src={generateImageUrl(veterinarian._id)+'?tr=w-1024'}
                   alt={veterinarian.title}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
                 />
               ) : (
-                <div className="flex items-center justify-center h-full bg-gray-200">
-                  <div className="text-center text-gray-500">
-                    <div className="text-6xl mb-4">🐾</div>
-                    <div className="text-lg">No Image</div>
-                  </div>
-                </div>
+                <div {...getImagePlaceholder('detail')} />
               )}
             </div>
 
@@ -239,7 +231,7 @@ export default function VeterinarianDetailPage() {
             {veterinarian.googleReview && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Google Review
+                Review from Google Maps
                 </h2>
                 <div className="flex items-center mb-3">
                   <div className="flex items-center">
@@ -316,7 +308,7 @@ export default function VeterinarianDetailPage() {
             )}
 
             {/* Location Info */}
-            {veterinarian.location && (
+            {/* {veterinarian.location && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Location
@@ -326,7 +318,7 @@ export default function VeterinarianDetailPage() {
                   <p>Longitude: {veterinarian.location.coordinates[0].toFixed(6)}</p>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </main>

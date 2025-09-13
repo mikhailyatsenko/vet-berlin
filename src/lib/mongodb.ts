@@ -49,7 +49,7 @@ export async function connectToDatabase() {
 export interface Veterinarian {
   _id?: string;
   title: string;
-  imageUrl?: string;
+  imageUrl?: boolean;
   categoryName: string;
   address?: string;
   street?: string;

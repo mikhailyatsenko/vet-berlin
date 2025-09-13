@@ -21,7 +21,9 @@ function slugify(input: string): string {
 
 function buildUrl(pathname: string, params: Record<string, string | undefined>) {
   const q = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => { if (v) q.set(k, v); });
+  Object.entries(params).forEach(([k, v]) => { 
+    if (v && !(k === 'page' && v === '1')) q.set(k, v); 
+  });
   const s = q.toString();
   return s ? `${pathname}?${s}` : pathname;
 }
