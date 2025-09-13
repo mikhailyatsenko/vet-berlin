@@ -5,10 +5,10 @@ import { ObjectId } from 'mongodb';
 
 export async function GET(
   request: Request,
-  context: unknown
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const identifier = (context as { params?: { id?: string } })?.params?.id;
+    const { id: identifier } = await context.params;
     
     if (!identifier) {
       return NextResponse.json(
