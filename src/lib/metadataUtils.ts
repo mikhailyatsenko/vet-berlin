@@ -126,3 +126,96 @@ export function generateVeterinarianStructuredData(veterinarian: Veterinarian) {
     value === undefined ? undefined : value
   ));
 }
+
+/**
+ * Generate page title for neighborhood page
+ */
+export function generateNeighborhoodTitle(neighborhoodName: string, totalVeterinarians: number): string {
+  return `Veterinarians in ${neighborhoodName} (${totalVeterinarians}) | Veterinarian Directory Berlin`;
+}
+
+/**
+ * Generate page description for neighborhood page
+ */
+export function generateNeighborhoodDescription(neighborhoodName: string, totalVeterinarians: number, categories: string[]): string {
+  const categoryText = categories.length > 0 ? ` including ${categories.slice(0, 3).join(', ')}` : '';
+  return `Find ${totalVeterinarians} veterinarians and pet clinics in ${neighborhoodName}, Berlin${categoryText}. Search by services, read reviews, and get contact information for top-rated veterinary practices in your area.`;
+}
+
+/**
+ * Generate keywords for neighborhood page
+ */
+export function generateNeighborhoodKeywords(neighborhoodName: string, categories: string[]): string[] {
+  const keywords = [
+    'veterinarian Berlin',
+    'pet clinic Berlin',
+    `veterinarian ${neighborhoodName}`,
+    `pet clinic ${neighborhoodName}`,
+    `animal hospital ${neighborhoodName}`,
+    `veterinary services ${neighborhoodName}`,
+    `pet doctor ${neighborhoodName}`,
+    `emergency vet ${neighborhoodName}`,
+    `cat vet ${neighborhoodName}`,
+    `dog vet ${neighborhoodName}`
+  ];
+  
+  // Add category-specific keywords
+  categories.forEach(category => {
+    keywords.push(`${category.toLowerCase()} ${neighborhoodName}`);
+  });
+  
+  return [...new Set(keywords)]; // Remove duplicates
+}
+
+/**
+ * Generate Open Graph data for neighborhood
+ */
+export function generateNeighborhoodOpenGraph(neighborhoodName: string, totalVeterinarians: number) {
+  return {
+    title: `Veterinarians in ${neighborhoodName}`,
+    description: generateNeighborhoodDescription(neighborhoodName, totalVeterinarians, []),
+    type: 'website',
+    url: `https://veterinarian-directory-berlin.vercel.app/${neighborhoodName.toLowerCase().replace(/\s+/g, '-')}`,
+    siteName: 'Veterinarian Directory Berlin',
+    images: [],
+    locale: 'en_US'
+  };
+}
+
+/**
+ * Generate structured data (JSON-LD) for neighborhood
+ */
+export function generateNeighborhoodStructuredData(neighborhoodName: string, totalVeterinarians: number, categories: string[]) {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `Veterinarians in ${neighborhoodName}`,
+    "description": generateNeighborhoodDescription(neighborhoodName, totalVeterinarians, categories),
+    "url": `https://veterinarian-directory-berlin.vercel.app/${neighborhoodName.toLowerCase().replace(/\s+/g, '-')}`,
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": `Veterinarians in ${neighborhoodName}`,
+      "numberOfItems": totalVeterinarians,
+      "itemListElement": []
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://veterinarian-directory-berlin.vercel.app/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": neighborhoodName,
+          "item": `https://veterinarian-directory-berlin.vercel.app/${neighborhoodName.toLowerCase().replace(/\s+/g, '-')}`
+        }
+      ]
+    }
+  };
+
+  return structuredData;
+}
