@@ -1,4 +1,6 @@
 import { connectToDatabase, Veterinarian, SearchFilters } from './mongodb';
+import { generateVeterinarianSlug, generateUniqueSlug } from './slugUtils';
+import { ObjectId } from 'mongodb';
 import type { Sort } from 'mongodb';
 
 export class VeterinarianService {
@@ -102,7 +104,24 @@ export class VeterinarianService {
         collection.find(query).sort(sortOptions).skip(skip).limit(pageSize).toArray(),
         collection.countDocuments(query)
       ]);
-      return { items, total, page, pageSize };
+      
+      // Ensure all items have slugs
+      const itemsWithSlugs = await Promise.all(
+        items.map(async (item) => {
+          if (!item.slug) {
+            const slug = await this.ensureUniqueSlug(item);
+            // Update the document with the new slug
+            await collection.updateOne(
+              { _id: item._id },
+              { $set: { slug } }
+            );
+            return { ...item, slug };
+          }
+          return item;
+        })
+      );
+      
+      return { items: itemsWithSlugs, total, page, pageSize };
     }
 
     const MAX_SCAN = 500;
@@ -155,7 +174,24 @@ export class VeterinarianService {
 
     const total = openCandidates.length;
     const paged = openCandidates.slice(skip, skip + pageSize);
-    return { items: paged, total, page, pageSize };
+    
+    // Ensure all items have slugs
+    const itemsWithSlugs = await Promise.all(
+      paged.map(async (item) => {
+        if (!item.slug) {
+          const slug = await this.ensureUniqueSlug(item);
+          // Update the document with the new slug
+          await collection.updateOne(
+            { _id: item._id },
+            { $set: { slug } }
+          );
+          return { ...item, slug };
+        }
+        return item;
+      })
+    );
+    
+    return { items: itemsWithSlugs, total, page, pageSize };
   }
 
   /**
@@ -210,6 +246,53 @@ export class VeterinarianService {
   static async getById(googleMapsId: string): Promise<Veterinarian | null> {
     const collection = await this.getCollection();
     return await collection.findOne({ googleMapsId });
+  }
+
+  /**
+   * Get a single veterinarian by MongoDB _id
+   */
+  static async getByMongoId(mongoId: string): Promise<Veterinarian | null> {
+    const collection = await this.getCollection();
+    try {
+      return await collection.findOne({ _id: new ObjectId(mongoId) });
+    } catch (error) {
+      // If mongoId is not a valid ObjectId, return null
+      return null;
+    }
+  }
+
+  /**
+   * Get a single veterinarian by slug
+   */
+  static async getBySlug(slug: string): Promise<Veterinarian | null> {
+    const collection = await this.getCollection();
+    return await collection.findOne({ slug });
+  }
+
+  /**
+   * Generate and ensure unique slug for a veterinarian
+   */
+  static async ensureUniqueSlug(veterinarian: Veterinarian): Promise<string> {
+    const collection = await this.getCollection();
+    
+    // If slug already exists and is correct, return it
+    if (veterinarian.slug) {
+      const existing = await collection.findOne({ 
+        slug: veterinarian.slug, 
+        _id: { $ne: veterinarian._id } 
+      });
+      if (!existing) {
+        return veterinarian.slug;
+      }
+    }
+    
+    // Generate new slug
+    const baseSlug = generateVeterinarianSlug(veterinarian.title, veterinarian.googleMapsId);
+    
+    // Get all existing slugs
+    const existingSlugs = await collection.distinct('slug', { slug: { $exists: true } }) as string[];
+    
+    return generateUniqueSlug(baseSlug, existingSlugs);
   }
 
   /**

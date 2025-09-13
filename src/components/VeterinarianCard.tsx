@@ -37,7 +37,7 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
       <div className="relative h-48 w-full bg-gray-200">
         {veterinarian.imageUrl && veterinarian._id ? (
           <Image
-            src={generateImageUrl(veterinarian._id)+'?tr=w-540'}
+            src={generateImageUrl(veterinarian._id.toString())+'?tr=w-540'}
             alt={veterinarian.title}
             fill
             className="object-cover"
@@ -148,7 +148,7 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
         {/* Action Button */}
         <div className="mt-4">
           <Link
-            href={`/veterinarian/${veterinarian.googleMapsId}`}
+            href={`/veterinarian/${veterinarian.slug || veterinarian._id?.toString() || veterinarian.googleMapsId}`}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-center block"
           >
             View Details

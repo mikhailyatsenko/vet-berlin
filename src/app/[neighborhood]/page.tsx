@@ -68,10 +68,10 @@ export default async function NeighborhoodPage({ params, searchParams }: PagePro
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <form method="GET" action={`/${encodeURIComponent(neighborhood)}`} className="space-y-4">
-            <div className="relative">
+            {/* <div className="relative">
               <input type="text" name="text" placeholder="Search..." defaultValue={text} className="w-full pl-4 pr-28 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Search</button>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>

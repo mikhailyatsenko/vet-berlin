@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, ObjectId } from 'mongodb';
 
 const MONGO_URI: string = process.env.MONGO_URI || '';
 const DB_NAME: string = process.env.DB_NAME || '';
@@ -47,8 +47,9 @@ export async function connectToDatabase() {
 }
 
 export interface Veterinarian {
-  _id?: string;
+  _id?: ObjectId;
   title: string;
+  slug?: string;
   imageUrl?: boolean;
   categoryName: string;
   address?: string;

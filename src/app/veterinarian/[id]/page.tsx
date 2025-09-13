@@ -32,10 +32,10 @@ export default function VeterinarianDetailPage() {
     }
   }, [params.id]);
 
-  const loadVeterinarian = async (id: string) => {
+  const loadVeterinarian = async (identifier: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/veterinarians/${id}`);
+      const response = await fetch(`/api/veterinarians/${identifier}`);
       
       if (!response.ok) {
         throw new Error('Veterinarian not found');
@@ -136,7 +136,7 @@ export default function VeterinarianDetailPage() {
             <div className="relative h-64 md:h-80 w-full mb-6 rounded-lg overflow-hidden bg-gray-200">
               {veterinarian.imageUrl && veterinarian._id ? (
                 <Image
-                  src={generateImageUrl(veterinarian._id)+'?tr=w-1024'}
+                  src={generateImageUrl(veterinarian._id.toString())+'?tr=w-1024'}
                   alt={veterinarian.title}
                   fill
                   className="object-cover"

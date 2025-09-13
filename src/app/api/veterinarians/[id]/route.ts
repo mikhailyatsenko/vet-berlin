@@ -1,21 +1,34 @@
 import { NextResponse } from 'next/server';
 import { VeterinarianService } from '@/lib/veterinarians';
+import { isValidSlug } from '@/lib/slugUtils';
+import { ObjectId } from 'mongodb';
 
 export async function GET(
   request: Request,
   context: unknown
 ) {
   try {
-    const id = (context as { params?: { id?: string } })?.params?.id;
+    const identifier = (context as { params?: { id?: string } })?.params?.id;
     
-    if (!id) {
+    if (!identifier) {
       return NextResponse.json(
-        { success: false, error: 'Veterinarian ID is required' },
+        { success: false, error: 'Veterinarian identifier is required' },
         { status: 400 }
       );
     }
 
-    const veterinarian = await VeterinarianService.getById(id);
+    let veterinarian;
+    
+    // Check if identifier is a slug (contains only lowercase letters, numbers, and hyphens)
+    if (isValidSlug(identifier)) {
+      veterinarian = await VeterinarianService.getBySlug(identifier);
+    } else if (ObjectId.isValid(identifier)) {
+      // Check if identifier is a valid MongoDB ObjectId
+      veterinarian = await VeterinarianService.getByMongoId(identifier);
+    } else {
+      // Fallback to Google Maps ID for backward compatibility
+      veterinarian = await VeterinarianService.getById(identifier);
+    }
 
     if (!veterinarian) {
       return NextResponse.json(
