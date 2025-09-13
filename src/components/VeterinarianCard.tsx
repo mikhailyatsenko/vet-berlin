@@ -37,7 +37,7 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
       <div className="relative h-48 w-full bg-gray-200">
         {veterinarian.imageUrl && veterinarian._id ? (
           <Image
-            src={generateImageUrl(veterinarian._id.toString())+'?tr=w-540'}
+            src={generateImageUrl(veterinarian._id.toString())}
             alt={veterinarian.title}
             fill
             className="object-cover"
@@ -139,9 +139,9 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
                Review from Google Maps
               </span>
             </div>
-            <p className="text-sm text-gray-600 line-clamp-2">
+            {veterinarian.googleReview.text && <p className="text-sm text-gray-600 line-clamp-2">
               &quot;{veterinarian.googleReview.text}&quot;
-            </p>
+            </p>}
           </div>
         )}
 

@@ -75,7 +75,7 @@ export function generateVeterinarianOpenGraph(veterinarian: Veterinarian) {
     siteName: 'Veterinarian Directory Berlin',
     images: veterinarian.imageUrl && veterinarian._id ? [
       {
-        url: `https://ik.imagekit.io/bdga8gpws/vet-berlin/main-img/${veterinarian._id.toString()}/main.jpg?tr=w-1200,h-630,fo-auto`,
+        url: `https://ik.imagekit.io/bdga8gpws/vet-berlin/main-img/${veterinarian._id.toString()}/main.jpg`,
         width: 1200,
         height: 630,
         alt: veterinarian.title
