@@ -154,7 +154,7 @@ export default function VeterinarianDetailPage() {
               {veterinarian.imageUrl && veterinarian._id ? (
                 <Image
                   src={
-                    generateImageUrl(veterinarian._id)
+                    generateImageUrl(veterinarian._id.toString())
                   }
                   alt={veterinarian.title}
                   fill
