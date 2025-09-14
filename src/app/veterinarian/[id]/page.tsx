@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { Veterinarian } from "@/lib/mongodb";
 import {
   ArrowLeft,
@@ -22,6 +21,7 @@ type OpeningHour = { day: string; hours: string };
 
 export default function VeterinarianDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [veterinarian, setVeterinarian] = useState<Veterinarian | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,13 +117,13 @@ export default function VeterinarianDetailPage() {
           <p className="text-gray-600 mb-6">
             {error || "The requested veterinarian does not exist"}
           </p>
-          <Link
-            href="/"
+          <button
+            onClick={() => router.back()}
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Directory
-          </Link>
+            Back
+          </button>
         </div>
       </div>
     );
@@ -134,13 +134,13 @@ export default function VeterinarianDetailPage() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link
-            href="/"
+          <button
+            onClick={() => router.back()}
             className="inline-flex items-center text-blue-600 hover:text-blue-800"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Directory
-          </Link>
+            Back
+          </button>
         </div>
       </header>
 

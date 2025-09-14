@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { PageHeader } from "@/components";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,7 +45,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="min-h-screen bg-gray-50">
+          <PageHeader
+            title="🐾 Veterinarian Directory"
+            subtitle="Find the best veterinarians in your Berlin"
+          />
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
