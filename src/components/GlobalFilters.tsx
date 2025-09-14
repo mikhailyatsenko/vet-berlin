@@ -81,7 +81,7 @@ export default function GlobalFilters({
   return (
     <Card className={`w-fit mb-6 ${className || ''}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-4 flex-wrap align-center justify-center">
+        <div className="flex gap-4 flex-wrap items-center justify-center">
            <ComboboxField
              name="neighborhood"
              label=""
