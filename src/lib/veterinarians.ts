@@ -255,7 +255,7 @@ export class VeterinarianService {
     const collection = await this.getCollection();
     try {
       return await collection.findOne({ _id: new ObjectId(mongoId) });
-    } catch (error) {
+    } catch {
       // If mongoId is not a valid ObjectId, return null
       return null;
     }

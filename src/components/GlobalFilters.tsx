@@ -3,7 +3,7 @@
 import { FormEvent, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { buildUrl, slugify } from '@/lib/utils';
-import { SelectField, CheckboxField, Button, Card } from '@/components';
+import { ComboboxField, CheckboxField, Button, Card } from '@/components';
 import { SelectOption } from '@/lib/types';
 
 interface GlobalFiltersProps {
@@ -18,7 +18,6 @@ export default function GlobalFilters({
   neighborhoodOptions, 
   currentNeighborhood, 
   currentOpenNow,
-  baseUrl = '/',
   className 
 }: GlobalFiltersProps) {
   const router = useRouter();
@@ -82,15 +81,16 @@ export default function GlobalFilters({
   return (
     <Card className={`w-fit mb-6 ${className || ''}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-4 flex-wrap justify-center">
-          <SelectField
-            name="neighborhood"
-            label=""
-            options={neighborhoodOptions}
-            value={neighborhood}
-            onChange={(e) => setNeighborhood(e.target.value)}
-            className="w-fit text-center"
-          />
+        <div className="flex gap-4 flex-wrap align-center justify-center">
+           <ComboboxField
+             name="neighborhood"
+             label=""
+             options={neighborhoodOptions}
+             value={neighborhood}
+             onChange={setNeighborhood}
+             placeholder="Search neighborhoods..."
+             className="w-fit text-center min-w-[200px]"
+           />
           
           <CheckboxField
             id="openNow"
