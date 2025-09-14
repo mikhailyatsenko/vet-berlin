@@ -47,6 +47,7 @@ export default async function NeighborhoodPage({ params, searchParams }: PagePro
         neighborhoodOptions={neighborhoodOptions}
         currentNeighborhood={neighborhoodName}
         currentOpenNow={openNow}
+        baseUrl={`/`}
       />
 
       <div className="mb-6">

@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes, forwardRef } from 'react';
+import { Button as HeadlessButton } from '@headlessui/react';
 import { clsx } from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -36,7 +37,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
     
     return (
-      <button
+      <HeadlessButton
         className={clsx(
           baseClasses,
           variants[variant],
@@ -52,7 +53,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2" />
         )}
         {children}
-      </button>
+      </HeadlessButton>
     );
   }
 );

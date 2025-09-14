@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { FormEvent, useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { buildUrl, slugify } from '@/lib/utils';
-import { ComboboxField, CheckboxField, Button, Card } from '@/components';
-import { SelectOption } from '@/lib/types';
+import { FormEvent, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { buildUrl, slugify } from "@/lib/utils";
+import { SelectField, CheckboxField, Button, Card } from "@/components";
+import { SelectOption } from "@/lib/types";
 
 interface GlobalFiltersProps {
   neighborhoodOptions: SelectOption[];
@@ -14,15 +14,16 @@ interface GlobalFiltersProps {
   className?: string;
 }
 
-export default function GlobalFilters({ 
-  neighborhoodOptions, 
-  currentNeighborhood, 
+export default function GlobalFilters({
+  neighborhoodOptions,
+  currentNeighborhood,
   currentOpenNow,
-  className 
+  baseUrl = "/",
+  className,
 }: GlobalFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // State for controlled components
   const [neighborhood, setNeighborhood] = useState(currentNeighborhood);
   const [openNow, setOpenNow] = useState(currentOpenNow);
@@ -33,14 +34,14 @@ export default function GlobalFilters({
     setOpenNow(currentOpenNow);
   }, [currentNeighborhood, currentOpenNow]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     // Get current search parameters
-    const currentText = searchParams.get('text');
-    const currentCategory = searchParams.get('category');
-    const currentPage = searchParams.get('page');
-    
+    const currentText = searchParams.get("text");
+    const currentCategory = searchParams.get("category");
+    const currentPage = searchParams.get("page");
+
     // If neighborhood is selected, redirect to neighborhood page
     if (neighborhood) {
       const neighborhoodSlug = slugify(neighborhood);
@@ -48,50 +49,52 @@ export default function GlobalFilters({
         text: currentText || undefined,
         category: currentCategory || undefined,
         page: currentPage || undefined,
-        openNow: openNow ? 'on' : undefined,
+        openNow: openNow ? "on" : undefined,
       };
-      
+
       // Reset page to 1 when changing neighborhood
       if (!currentPage) {
         delete neighborhoodParams.page;
       }
-      
-      const neighborhoodUrl = buildUrl(`/${neighborhoodSlug}`, neighborhoodParams);
+
+      const neighborhoodUrl = buildUrl(
+        `/${neighborhoodSlug}`,
+        neighborhoodParams
+      );
       router.push(neighborhoodUrl);
       return;
     }
-    
+
     // If no neighborhood selected, redirect to main page
     const mainPageParams: Record<string, string | undefined> = {
       text: currentText || undefined,
       category: currentCategory || undefined,
       page: currentPage || undefined,
-      openNow: openNow ? 'on' : undefined,
+      openNow: openNow ? "on" : undefined,
     };
-    
+
     // Reset page to 1 when changing filters (except when page is explicitly set)
     if (!currentPage) {
       delete mainPageParams.page;
     }
-    
-    const mainPageUrl = buildUrl('/', mainPageParams);
+
+    const mainPageUrl = buildUrl("/", mainPageParams);
     router.push(mainPageUrl);
   };
 
   return (
-    <Card className={`w-fit mb-6 ${className || ''}`}>
+    <Card className={`w-fit mb-6 ${className || ""}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex gap-4 flex-wrap items-center justify-center">
-           <ComboboxField
-             name="neighborhood"
-             label=""
-             options={neighborhoodOptions}
-             value={neighborhood}
-             onChange={setNeighborhood}
-             placeholder="Search neighborhoods..."
-             className="w-fit text-center min-w-[200px]"
-           />
-          
+          <SelectField
+            name="neighborhood"
+            label=""
+            options={neighborhoodOptions}
+            value={neighborhood}
+            onChange={(e) => setNeighborhood(e.target.value)}
+            className="text-center"
+          />
+
           <CheckboxField
             id="openNow"
             name="openNow"
@@ -100,9 +103,21 @@ export default function GlobalFilters({
             onChange={(e) => setOpenNow(e.target.checked)}
             className="text-nowrap"
           />
-          
+
           <Button type="submit" variant="outline" className="text-nowrap">
             Apply filters
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-nowrap"
+            onClick={() => {
+              setNeighborhood("");
+              router.push(baseUrl);
+            }}
+          >
+            Reset filters
           </Button>
         </div>
       </form>

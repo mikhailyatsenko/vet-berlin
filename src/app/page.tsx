@@ -60,6 +60,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         neighborhoodOptions={neighborhoodOptions}
         currentNeighborhood={neighborhoodQuery}
         currentOpenNow={openNow}
+        baseUrl="/"
       />
 
       <div className="mb-6">
