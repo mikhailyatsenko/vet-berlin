@@ -1,3 +1,4 @@
+import { SkeletonCard, SkeletonFilters } from "@/components/ui/Skeleton";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 export default function Loading() {
@@ -11,13 +12,7 @@ export default function Loading() {
         </div>
 
         {/* Filters skeleton */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-4 mb-4">
-            <div className="h-10 bg-gray-200 rounded w-48 animate-pulse"></div>
-            <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
-            <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
-          </div>
-        </div>
+        <SkeletonFilters />
 
         {/* Results count skeleton */}
         <div className="mb-6">
@@ -27,20 +22,7 @@ export default function Loading() {
         {/* Cards grid skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-16 h-16 bg-gray-200 rounded-lg animate-pulse"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse"></div>
-                </div>
-              </div>
-              <div className="mt-4 space-y-2">
-                <div className="h-3 bg-gray-200 rounded w-full animate-pulse"></div>
-                <div className="h-3 bg-gray-200 rounded w-4/5 animate-pulse"></div>
-              </div>
-            </div>
+            <SkeletonCard key={index} />
           ))}
         </div>
 

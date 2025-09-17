@@ -8,6 +8,7 @@ interface PageHeaderProps {
   stats?: StatsCardType[];
   children?: ReactNode;
   className?: string;
+  filterInfo?: string;
 }
 
 export default function PageHeader({ 
@@ -15,7 +16,8 @@ export default function PageHeader({
   subtitle, 
   stats = [], 
   children,
-  className 
+  className,
+  filterInfo
 }: PageHeaderProps) {
   return (
     <header className={`bg-white shadow-sm ${className}`}>
@@ -28,6 +30,11 @@ export default function PageHeader({
             {subtitle && (
               <p className="mt-2 text-gray-600">
                 {subtitle}
+              </p>
+            )}
+            {filterInfo && (
+              <p className="mt-1 text-sm text-gray-700 font-medium bg-gray-100 px-3 py-1 rounded-full inline-block">
+                {filterInfo}
               </p>
             )}
           </div>

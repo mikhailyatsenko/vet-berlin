@@ -3,7 +3,7 @@
 import { FormEvent, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { buildUrl, slugify } from "@/lib/utils";
-import { SelectField, CheckboxField, Button, Card } from "@/components";
+import { SelectField, Button, Card, Switch } from "@/components";
 import { SelectOption } from "@/lib/types";
 
 interface GlobalFiltersProps {
@@ -27,6 +27,7 @@ export default function GlobalFilters({
   // State for controlled components
   const [neighborhood, setNeighborhood] = useState(currentNeighborhood);
   const [openNow, setOpenNow] = useState(currentOpenNow);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Update state when props change
   useEffect(() => {
@@ -34,52 +35,69 @@ export default function GlobalFilters({
     setOpenNow(currentOpenNow);
   }, [currentNeighborhood, currentOpenNow]);
 
+  // Check if any filters are applied
+  const hasActiveFilters = currentNeighborhood || currentOpenNow;
+  
+  // Check if current form values differ from displayed values
+  const hasChanges = neighborhood !== currentNeighborhood || openNow !== currentOpenNow;
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Get current search parameters
-    const currentText = searchParams.get("text");
-    const currentCategory = searchParams.get("category");
-    const currentPage = searchParams.get("page");
+    if (isLoading) return; // Prevent multiple submissions
 
-    // If neighborhood is selected, redirect to neighborhood page
-    if (neighborhood) {
-      const neighborhoodSlug = slugify(neighborhood);
-      const neighborhoodParams: Record<string, string | undefined> = {
+    setIsLoading(true);
+
+    try {
+      // Get current search parameters
+      const currentText = searchParams.get("text");
+      const currentCategory = searchParams.get("category");
+      const currentPage = searchParams.get("page");
+
+      // If neighborhood is selected, redirect to neighborhood page
+      if (neighborhood) {
+        const neighborhoodSlug = slugify(neighborhood);
+        const neighborhoodParams: Record<string, string | undefined> = {
+          text: currentText || undefined,
+          category: currentCategory || undefined,
+          page: currentPage || undefined,
+          openNow: openNow ? "on" : undefined,
+        };
+
+        // Reset page to 1 when changing neighborhood
+        if (!currentPage) {
+          delete neighborhoodParams.page;
+        }
+
+        const neighborhoodUrl = buildUrl(
+          `/${neighborhoodSlug}`,
+          neighborhoodParams
+        );
+        router.push(neighborhoodUrl);
+        return;
+      }
+
+      // If no neighborhood selected, redirect to main page
+      const mainPageParams: Record<string, string | undefined> = {
         text: currentText || undefined,
         category: currentCategory || undefined,
         page: currentPage || undefined,
         openNow: openNow ? "on" : undefined,
       };
 
-      // Reset page to 1 when changing neighborhood
+      // Reset page to 1 when changing filters (except when page is explicitly set)
       if (!currentPage) {
-        delete neighborhoodParams.page;
+        delete mainPageParams.page;
       }
 
-      const neighborhoodUrl = buildUrl(
-        `/${neighborhoodSlug}`,
-        neighborhoodParams
-      );
-      router.push(neighborhoodUrl);
-      return;
+      const mainPageUrl = buildUrl("/", mainPageParams);
+      router.push(mainPageUrl);
+    } catch (error) {
+      console.error('Error applying filters:', error);
+    } finally {
+      // Reset loading state after a short delay to show the spinner
+      setTimeout(() => setIsLoading(false), 500);
     }
-
-    // If no neighborhood selected, redirect to main page
-    const mainPageParams: Record<string, string | undefined> = {
-      text: currentText || undefined,
-      category: currentCategory || undefined,
-      page: currentPage || undefined,
-      openNow: openNow ? "on" : undefined,
-    };
-
-    // Reset page to 1 when changing filters (except when page is explicitly set)
-    if (!currentPage) {
-      delete mainPageParams.page;
-    }
-
-    const mainPageUrl = buildUrl("/", mainPageParams);
-    router.push(mainPageUrl);
   };
 
   return (
@@ -93,32 +111,42 @@ export default function GlobalFilters({
             value={neighborhood}
             onChange={(e) => setNeighborhood(e.target.value)}
             className="text-center"
+            disabled={isLoading}
           />
 
-          <CheckboxField
-            id="openNow"
-            name="openNow"
-            label="Open now"
+          <Switch
             checked={openNow}
-            onChange={(e) => setOpenNow(e.target.checked)}
+            onChange={setOpenNow}
+            label="Open now"
             className="text-nowrap"
+            disabled={isLoading}
           />
 
-          <Button type="submit" variant="outline" className="text-nowrap">
+          <Button 
+            type="submit" 
+            variant="outline" 
+            className="text-nowrap"
+            loading={isLoading}
+            disabled={isLoading || !hasChanges}
+          >
             Apply filters
           </Button>
 
-          <Button
-            type="button"
-            variant="ghost"
-            className="text-nowrap"
-            onClick={() => {
-              setNeighborhood("");
-              router.push(baseUrl);
-            }}
-          >
-            Reset filters
-          </Button>
+          {hasActiveFilters && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-nowrap"
+              disabled={isLoading}
+              onClick={() => {
+                setNeighborhood("");
+                setOpenNow(false);
+                router.push(baseUrl);
+              }}
+            >
+              Reset filters
+            </Button>
+          )}
         </div>
       </form>
     </Card>
