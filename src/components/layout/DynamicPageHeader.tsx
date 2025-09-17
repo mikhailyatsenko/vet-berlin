@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams, usePathname } from 'next/navigation';
 import PageHeader from './PageHeader';
 
@@ -9,7 +10,7 @@ interface DynamicPageHeaderProps {
   className?: string;
 }
 
-export default function DynamicPageHeader({ 
+function DynamicPageHeaderContent({ 
   title, 
   subtitle, 
   className 
@@ -50,5 +51,19 @@ export default function DynamicPageHeader({
       className={className}
       filterInfo={filterInfo}
     />
+  );
+}
+
+export default function DynamicPageHeader(props: DynamicPageHeaderProps) {
+  return (
+    <Suspense fallback={
+      <PageHeader
+        title={props.title}
+        subtitle={props.subtitle}
+        className={props.className}
+      />
+    }>
+      <DynamicPageHeaderContent {...props} />
+    </Suspense>
   );
 }

@@ -54,6 +54,7 @@ const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
           leave="transition-opacity duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
+          as="div"
         >
           <div ref={ref} className={clsx('space-y-2', className)} {...props}>
             {Array.from({ length: lines }, (_, i) => (
@@ -82,6 +83,7 @@ const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
         leave="transition-opacity duration-200"
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
+        as="div"
       >
         <div
           ref={ref}
