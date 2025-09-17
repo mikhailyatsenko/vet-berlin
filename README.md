@@ -1,6 +1,6 @@
 # Vet Catalog
 
-A Next.js application for discovering and searching veterinarians in your area. Built with modern React patterns and MongoDB integration.
+A Next.js application for discovering and searching veterinarians in Berlin. Built with modern React patterns and MongoDB integration.
 
 ## Features
 
