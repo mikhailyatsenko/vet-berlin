@@ -28,11 +28,15 @@ export default function GlobalFilters({
   const [neighborhood, setNeighborhood] = useState(currentNeighborhood);
   const [openNow, setOpenNow] = useState(currentOpenNow);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Update state when props change
   useEffect(() => {
     setNeighborhood(currentNeighborhood);
     setOpenNow(currentOpenNow);
+    // Reset loading states when props change (navigation completed)
+    setIsLoading(false);
+    setIsResetting(false);
   }, [currentNeighborhood, currentOpenNow]);
 
   // Check if any filters are applied
@@ -40,11 +44,14 @@ export default function GlobalFilters({
   
   // Check if current form values differ from displayed values
   const hasChanges = neighborhood !== currentNeighborhood || openNow !== currentOpenNow;
+  
+  // Check if any loading state is active
+  const isAnyLoading = isLoading || isResetting;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (isLoading) return; // Prevent multiple submissions
+    if (isAnyLoading) return; // Prevent multiple submissions
 
     setIsLoading(true);
 
@@ -100,6 +107,23 @@ export default function GlobalFilters({
     }
   };
 
+  const handleReset = async () => {
+    if (isAnyLoading) return; // Prevent multiple submissions
+
+    setIsResetting(true);
+
+    try {
+      setNeighborhood("");
+      setOpenNow(false);
+      router.push(baseUrl);
+    } catch (error) {
+      console.error('Error resetting filters:', error);
+    } finally {
+      // Reset loading state after a short delay to show the spinner
+      setTimeout(() => setIsResetting(false), 500);
+    }
+  };
+
   return (
     <Card className={`w-fit mb-6 ${className || ""}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -111,7 +135,7 @@ export default function GlobalFilters({
             value={neighborhood}
             onChange={(e) => setNeighborhood(e.target.value)}
             className="text-center"
-            disabled={isLoading}
+            disabled={isAnyLoading}
           />
 
           <Switch
@@ -119,7 +143,7 @@ export default function GlobalFilters({
             onChange={setOpenNow}
             label="Open now"
             className="text-nowrap"
-            disabled={isLoading}
+            disabled={isAnyLoading}
           />
 
           <Button 
@@ -127,7 +151,7 @@ export default function GlobalFilters({
             variant="outline" 
             className="text-nowrap"
             loading={isLoading}
-            disabled={isLoading || !hasChanges}
+            disabled={isAnyLoading || !hasChanges}
           >
             Apply filters
           </Button>
@@ -137,12 +161,9 @@ export default function GlobalFilters({
               type="button"
               variant="ghost"
               className="text-nowrap"
-              disabled={isLoading}
-              onClick={() => {
-                setNeighborhood("");
-                setOpenNow(false);
-                router.push(baseUrl);
-              }}
+              loading={isResetting}
+              disabled={isAnyLoading}
+              onClick={handleReset}
             >
               Reset filters
             </Button>
