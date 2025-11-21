@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { buildUrl } from '@/lib/utils';
 import Button from './Button';
@@ -17,6 +20,8 @@ export default function Pagination({
   searchParams,
   className 
 }: PaginationProps) {
+  const [isNavigating, setIsNavigating] = useState<'previous' | 'next' | null>(null);
+  
   const canGoPrevious = currentPage > 1;
   const canGoNext = currentPage < totalPages;
   
@@ -33,6 +38,14 @@ export default function Pagination({
         page: String(currentPage + 1)
       })
     : '#';
+
+  const handleNavigation = (direction: 'previous' | 'next') => {
+    if (isNavigating) return;
+    
+    setIsNavigating(direction);
+    // The navigation will happen via the Link click, this just shows loading state briefly
+    setTimeout(() => setIsNavigating(null), 1000);
+  };
   
   return (
     <div className={`flex items-center justify-between ${className}`}>
@@ -41,21 +54,29 @@ export default function Pagination({
       </div>
       
       <div className="flex items-center gap-2">
-        <Link href={previousUrl}>
+        <Link 
+          href={previousUrl}
+          onClick={() => handleNavigation('previous')}
+        >
           <Button
             variant="outline"
-            disabled={!canGoPrevious}
+            disabled={!canGoPrevious || isNavigating !== null}
             className="min-w-[80px]"
+            loading={isNavigating === 'previous'}
           >
             Previous
           </Button>
         </Link>
         
-        <Link href={nextUrl}>
+        <Link 
+          href={nextUrl}
+          onClick={() => handleNavigation('next')}
+        >
           <Button
             variant="outline"
-            disabled={!canGoNext}
+            disabled={!canGoNext || isNavigating !== null}
             className="min-w-[80px]"
+            loading={isNavigating === 'next'}
           >
             Next
           </Button>

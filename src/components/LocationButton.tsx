@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin } from 'lucide-react';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface LocationButtonProps {
   onLocationFound: (coords: { lat: number; lng: number }) => void;
@@ -58,7 +59,7 @@ export default function LocationButton({ onLocationFound, onError }: LocationBut
       className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+        <LoadingSpinner size="sm" color="white" className="mr-2" />
       ) : (
         <MapPin className="w-4 h-4 mr-2" />
       )}

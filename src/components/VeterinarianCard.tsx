@@ -1,9 +1,13 @@
+'use client';
+
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Star, Phone, Globe, Clock } from 'lucide-react';
 import { Veterinarian } from '@/lib/mongodb';
 import { getBerlinTodayName, convertHoursTo24h } from '@/lib/timeUtils';
 import { generateImageUrl, getImagePlaceholder } from '@/lib/imageUtils';
+import Button from '@/components/ui/Button';
 
 type OpeningHour = { day: string; hours: string };
 
@@ -12,6 +16,14 @@ interface VeterinarianCardProps {
 }
 
 export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps) {
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleViewDetails = () => {
+    if (isNavigating) return;
+    setIsNavigating(true);
+    // Reset after a short delay in case navigation is slow
+    setTimeout(() => setIsNavigating(false), 2000);
+  };
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -149,9 +161,15 @@ export default function VeterinarianCard({ veterinarian }: VeterinarianCardProps
         <div className="mt-4">
           <Link
             href={`/veterinarian/${veterinarian.slug || veterinarian._id?.toString() || veterinarian.googleMapsId}`}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 text-center block"
+            onClick={handleViewDetails}
           >
-            View Details
+            <Button
+              className="w-full"
+              loading={isNavigating}
+              disabled={isNavigating}
+            >
+              View Details
+            </Button>
           </Link>
         </div>
       </div>
