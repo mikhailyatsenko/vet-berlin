@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { buildUrl, slugify } from "@/lib/utils";
 import { SelectField, Button, Card, Switch } from "@/components";
 import { SelectOption } from "@/lib/types";
+import { useAsyncAction } from "@/hooks/useAsyncAction";
 
 interface GlobalFiltersProps {
   neighborhoodOptions: SelectOption[];
@@ -27,16 +28,22 @@ export default function GlobalFilters({
   // State for controlled components
   const [neighborhood, setNeighborhood] = useState(currentNeighborhood);
   const [openNow, setOpenNow] = useState(currentOpenNow);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
+
+  // Use async action hooks for better loading state management
+  const submitAction = useAsyncAction({
+    resetOnSuccess: true,
+    resetDelay: 500,
+  });
+
+  const resetAction = useAsyncAction({
+    resetOnSuccess: true,
+    resetDelay: 500,
+  });
 
   // Update state when props change
   useEffect(() => {
     setNeighborhood(currentNeighborhood);
     setOpenNow(currentOpenNow);
-    // Reset loading states when props change (navigation completed)
-    setIsLoading(false);
-    setIsResetting(false);
   }, [currentNeighborhood, currentOpenNow]);
 
   // Check if any filters are applied
@@ -46,16 +53,14 @@ export default function GlobalFilters({
   const hasChanges = neighborhood !== currentNeighborhood || openNow !== currentOpenNow;
   
   // Check if any loading state is active
-  const isAnyLoading = isLoading || isResetting;
+  const isAnyLoading = submitAction.loading || resetAction.loading;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isAnyLoading) return; // Prevent multiple submissions
 
-    setIsLoading(true);
-
-    try {
+    await submitAction.execute(async () => {
       // Get current search parameters
       const currentText = searchParams.get("text");
       const currentCategory = searchParams.get("category");
@@ -99,29 +104,17 @@ export default function GlobalFilters({
 
       const mainPageUrl = buildUrl("/", mainPageParams);
       router.push(mainPageUrl);
-    } catch (error) {
-      console.error('Error applying filters:', error);
-    } finally {
-      // Reset loading state after a short delay to show the spinner
-      setTimeout(() => setIsLoading(false), 500);
-    }
+    });
   };
 
   const handleReset = async () => {
     if (isAnyLoading) return; // Prevent multiple submissions
 
-    setIsResetting(true);
-
-    try {
+    await resetAction.execute(async () => {
       setNeighborhood("");
       setOpenNow(false);
       router.push(baseUrl);
-    } catch (error) {
-      console.error('Error resetting filters:', error);
-    } finally {
-      // Reset loading state after a short delay to show the spinner
-      setTimeout(() => setIsResetting(false), 500);
-    }
+    });
   };
 
   return (
@@ -150,7 +143,7 @@ export default function GlobalFilters({
             type="submit" 
             variant="outline" 
             className="text-nowrap"
-            loading={isLoading}
+            loading={submitAction.loading}
             disabled={isAnyLoading || !hasChanges}
           >
             Apply filters
@@ -161,7 +154,7 @@ export default function GlobalFilters({
               type="button"
               variant="ghost"
               className="text-nowrap"
-              loading={isResetting}
+              loading={resetAction.loading}
               disabled={isAnyLoading}
               onClick={handleReset}
             >

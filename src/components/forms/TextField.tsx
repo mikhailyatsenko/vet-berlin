@@ -8,6 +8,7 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   description?: string;
   helperText?: string;
+  loading?: boolean;
 }
 
 const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
@@ -17,6 +18,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
     error, 
     description,
     helperText,
+    loading = false,
     id,
     name,
     ...props 
@@ -33,17 +35,26 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
           {label}
         </label>
         
-        <input
-          ref={ref}
-          id={fieldId}
-          className={clsx(
-            'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500',
-            'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
-            error && 'border-red-300 focus:border-red-500 focus:ring-red-500',
-            className
+        <div className="relative">
+          <input
+            ref={ref}
+            id={fieldId}
+            className={clsx(
+              'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500',
+              'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
+              error && 'border-red-300 focus:border-red-500 focus:ring-red-500',
+              loading && 'pr-10',
+              className
+            )}
+            disabled={props.disabled || loading}
+            {...props}
+          />
+          {loading && (
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+            </div>
           )}
-          {...props}
-        />
+        </div>
         
         {description && (
           <p className="text-xs text-gray-500">{description}</p>

@@ -15,3 +15,5 @@ export * from './layout';
 export { default as VeterinarianCard } from './VeterinarianCard';
 export { default as GlobalFilters } from './GlobalFilters';
 export { default as LocationButton } from './LocationButton';
+export { default as LoadingExamples } from './LoadingExamples';
+export { default as VeterinarianListLoading } from './VeterinarianListLoading';
