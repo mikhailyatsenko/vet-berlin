@@ -72,13 +72,13 @@ export default function GlobalFilters({
         const neighborhoodParams: Record<string, string | undefined> = {
           text: currentText || undefined,
           category: currentCategory || undefined,
-          page: currentPage || undefined,
           openNow: openNow ? "on" : undefined,
         };
 
-        // Reset page to 1 when changing neighborhood
-        if (!currentPage) {
-          delete neighborhoodParams.page;
+        // Always reset page to 1 when applying filters
+        // Only keep page if it's explicitly set to 1
+        if (currentPage === "1") {
+          neighborhoodParams.page = "1";
         }
 
         const neighborhoodUrl = buildUrl(
@@ -93,13 +93,13 @@ export default function GlobalFilters({
       const mainPageParams: Record<string, string | undefined> = {
         text: currentText || undefined,
         category: currentCategory || undefined,
-        page: currentPage || undefined,
         openNow: openNow ? "on" : undefined,
       };
 
-      // Reset page to 1 when changing filters (except when page is explicitly set)
-      if (!currentPage) {
-        delete mainPageParams.page;
+      // Always reset page to 1 when applying filters
+      // Only keep page if it's explicitly set to 1
+      if (currentPage === "1") {
+        mainPageParams.page = "1";
       }
 
       const mainPageUrl = buildUrl("/", mainPageParams);
